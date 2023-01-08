@@ -6,5 +6,6 @@ class RoutesNames{
   static const String mobilelayout='mobile_layout';
   static const String weblayout='web_layout';
   static const String editprofile='edit_profile';
+  static const String chatsscreen='chats_screen';
 
 }

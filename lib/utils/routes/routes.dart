@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone/Responsive/mobile_layout.dart';
 import 'package:instagram_clone/Responsive/responsive_layout.dart';
 import 'package:instagram_clone/Responsive/web_layout.dart';
+import 'package:instagram_clone/Screens/chats_screen.dart';
 import 'package:instagram_clone/Screens/edit_profile.dart';
 import 'package:instagram_clone/Screens/signup_screen.dart';
 import 'package:instagram_clone/utils/routes/routes_names.dart';
@@ -23,6 +24,8 @@ class Routes{
         return MaterialPageRoute(builder: (BuildContext context)=>WebLayout());
       case RoutesNames.editprofile:
         return MaterialPageRoute(builder: (BuildContext context)=>EditProfile());
+      case RoutesNames.chatsscreen:
+        return MaterialPageRoute(builder: (BuildContext context)=>ChatsScreen());
     // case RoutesNames.verifyCode:
     //   return MaterialPageRoute(builder: (BuildContext context)=>VerifyCodeScreen());
       default:

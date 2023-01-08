@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/utils/circular_progress_indicator.dart';
 import 'package:instagram_clone/utils/global_variables.dart';
+import 'package:instagram_clone/utils/routes/routes_names.dart';
 import 'package:instagram_clone/widgets/post_card.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 
@@ -23,11 +24,15 @@ class FeedScreen extends StatelessWidget {
         actions: [
           Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Image.asset('assets/messenger.png',color:primaryColor,height: height*0.009,width: width*0.07,)),
+              child: InkWell(
+                  onTap: (){
+                    Navigator.pushNamed(context, RoutesNames.chatsscreen);
+                  },
+                  child: Image.asset('assets/messenger.png',color:primaryColor,height: height*0.009,width: width*0.07,))),
         ],
       ),
       body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('posts').snapshots(),
+        stream: FirebaseFirestore.instance.collection('posts').orderBy('dateTime',descending: true).snapshots(),
           builder: (context,AsyncSnapshot<QuerySnapshot<Map<String,dynamic>>> snapshot){
           if(snapshot.connectionState==ConnectionState.waiting || !snapshot.hasData || snapshot.hasError){
             return Center(

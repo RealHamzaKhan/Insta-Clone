@@ -171,4 +171,24 @@ class FireStoreMethods{
     }
     return res;
   }
+  Future<String> sendMessage({
+  required String senderUid,required String recieverUid,required String message
+})async{
+    String res='some error occured';
+    try{
+      String chatId=Uuid().v1();
+      await firestore.collection('chats').doc(chatId).set({
+        'senderuid':senderUid,
+        'recieveruid':recieverUid,
+        'chatuid':chatId,
+        'message':message,
+        'datetime':DateTime.now()
+      });
+      res='success';
+    }
+    catch(e){
+      res=e.toString();
+    }
+    return res;
+  }
 }
