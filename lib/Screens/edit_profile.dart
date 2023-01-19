@@ -1,13 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:instagram_clone/Models/user_model.dart';
-import 'package:instagram_clone/Provider/user_provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/resources/Firestore_methods.dart';
+import 'package:instagram_clone/resources/storage_methods.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/utils.dart';
-import 'package:provider/provider.dart';
 
 import '../utils/circular_progress_indicator.dart';
 class EditProfile extends StatefulWidget {
@@ -18,6 +18,8 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+  Uint8List? _file;
+  String url='';
   var snapshot;
   bool _isDataFetched=false;
   bool isUpdate=false;
@@ -27,6 +29,68 @@ class _EditProfileState extends State<EditProfile> {
     // TODO: implement initState
     super.initState();
   }
+  selectImage(BuildContext parentContext)async{
+    return showDialog(context: parentContext, builder: (BuildContext context){
+      return SimpleDialog(
+        title: Text('Add a post'),
+        children: [
+          SimpleDialogOption(
+            padding: EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: const [
+                Icon(Icons.camera_alt),
+                SizedBox(width: 10,),
+                Text('Choose from Camera')
+              ],
+            ),
+            onPressed: ()async{
+              Navigator.of(context).pop();
+              Uint8List file=await Utils().pickImage(ImageSource.camera);
+              setState(() {
+                _file=file;
+              });
+
+            },
+          ),
+          SimpleDialogOption(
+            padding: EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: const [
+                Icon(Icons.browse_gallery),
+                SizedBox(width: 10,),
+                Text('Choose from Gallery')
+              ],
+
+            ),
+            onPressed: ()async{
+              Navigator.of(context).pop();
+              Uint8List file=await Utils().pickImage(ImageSource.gallery);
+              setState(() {
+                _file=file;
+              });
+            },
+          ),
+          SimpleDialogOption(
+            padding: EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: const [
+                Icon(Icons.cancel),
+                SizedBox(width: 10,),
+                Text('Cancel')
+              ],
+            ),
+            onPressed: (){
+              Navigator.of(context).pop();
+
+            },
+          ),
+        ],
+      );
+    });
+  }
   void getSnapshot()async{
     snapshot=await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get();
     setState(() {
@@ -35,17 +99,19 @@ class _EditProfileState extends State<EditProfile> {
   }
   void profileUpdate()async{
     try{
+      if(_file!=null){
+       url= await StorageMethods().uploadImageToStorage('Profile Pics', _file!, false);
+      }
       DocumentSnapshot snap=await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get();
       String res= await FireStoreMethods().updateProfile(
           uid: FirebaseAuth.instance.currentUser!.uid,
-          email: email.text.isNotEmpty?email.text:snap['email'],
+          url: url.isNotEmpty?url:snap['photourl'],
           username: username.text.isNotEmpty?username.text:snap['username'],
           bio: bio.text.isNotEmpty?bio.text:snap['bio']);
       if(res=='success'){
         Utils().showSnackBar(context, 'Updated successfully', Colors.green);
         setState(() {
           isUpdate=false;
-          email.clear();
           bio.clear();
           username.clear();
         });
@@ -67,14 +133,12 @@ class _EditProfileState extends State<EditProfile> {
   }
   @override
   void dispose() {
-    email.dispose();
     bio.dispose();
     username.dispose();
     // TODO: implement dispose
     super.dispose();
   }
   TextEditingController username=TextEditingController();
-  TextEditingController email=TextEditingController();
   TextEditingController bio=TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -84,7 +148,7 @@ class _EditProfileState extends State<EditProfile> {
         Center(child: CircularIndicator,)
         :Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile'),
+        title: const Text('Edit Profile'),
         backgroundColor: mobileBackgroundColor,
       ),
       body: SafeArea(
@@ -95,7 +159,27 @@ class _EditProfileState extends State<EditProfile> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                EditProfileTextField(controller: email, hintText: snapshot['email']),
+                Stack(
+                  children: [
+                    _file!=null
+                        ?CircleAvatar(
+                      backgroundImage: MemoryImage(_file!),
+                      radius: 60,
+                    )
+                    :CircleAvatar(
+                      backgroundImage: NetworkImage(snapshot['photourl']),
+                      radius: 60,
+                    ),
+                    Positioned(
+                        bottom: -10,
+                        right: 0,
+                        child: IconButton(
+                            onPressed: (){
+                              selectImage(context);
+                            },
+                            icon: Icon(Icons.camera_alt,color: Colors.blue,size: 30,)))
+                  ],
+                ),
                 SizedBox(height: height*0.04,),
                 EditProfileTextField(controller: username, hintText: snapshot['username']),
                 SizedBox(height: height*0.04,),
@@ -113,7 +197,7 @@ class _EditProfileState extends State<EditProfile> {
                     });
                   },
                   child: Container(
-                    constraints: BoxConstraints(
+                    constraints: const BoxConstraints(
                       maxHeight: double.infinity,
                       maxWidth: double.infinity
                     ),
@@ -123,7 +207,7 @@ class _EditProfileState extends State<EditProfile> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 10),
-                      child: !isUpdate?Text('Update',style: TextStyle(
+                      child: !isUpdate?const Text('Update',style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18
                       ),):Center(child: CircularProgressIndicator())
@@ -147,7 +231,7 @@ class EditProfileTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(
+      constraints: const BoxConstraints(
           maxWidth: double.infinity,
           maxHeight: double.infinity
       ),

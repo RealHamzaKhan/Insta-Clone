@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:instagram_clone/Models/user_model.dart';
+import 'package:instagram_clone/resources/notification_methods.dart';
 import 'package:instagram_clone/resources/storage_methods.dart';
 
 class AuthMethods{
@@ -10,6 +11,10 @@ class AuthMethods{
 
   Future<UserModel> getUserDetails() async{
     User currentUser=_auth.currentUser!;
+    String pushtoken=await NotificationMethods.getFirebaseMessagingToken();
+    await firestore.collection('users').doc(currentUser.uid).update({
+      'pushtoken':pushtoken
+    });
     DocumentSnapshot snap=await firestore.collection('users').doc(currentUser.uid).get();
     return UserModel.fromSnap(snap);
   }
@@ -32,7 +37,9 @@ class AuthMethods{
             photourl: photoUrl,
             bio: bio,
             following: [],
-            followers: []);
+            followers: [],
+          pushtoken: ''
+        );
         await firestore.collection('users').doc(credential.user!.uid).set(_user.toJson());
         res='success';
       }

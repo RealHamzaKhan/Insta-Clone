@@ -74,7 +74,7 @@ class _CommentScreenState extends State<CommentScreen> {
                     child: TextFormField(
                       maxLines: null,
                       controller: commentController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Add a comment',
                         contentPadding: EdgeInsets.symmetric(horizontal: 7),
@@ -84,12 +84,13 @@ class _CommentScreenState extends State<CommentScreen> {
                   TextButton(
                     onPressed: ()async{
                       if(commentController.text.isNotEmpty){
-                        FireStoreMethods().addComment(user.uid, widget.snap['postid'], commentController.text, user.username, user.photourl);
+                        await FireStoreMethods().addComment(user.uid, widget.snap['postid'], commentController.text, user.username, user.photourl);
                         commentController.clear();
+                        await FireStoreMethods().generateNotication(reciveruid: widget.snap['uid'], notication: 'Commented on your post', photourl: user.photourl, username: user.username);
                       }
 
                     },
-                    child: Text('Post',style: TextStyle(
+                    child: const Text('Post',style: TextStyle(
                         color: Colors.blue,
                         fontWeight: FontWeight.bold,
                         fontSize: 16

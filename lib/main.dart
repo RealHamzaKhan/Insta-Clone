@@ -2,6 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_notification_channel/flutter_notification_channel.dart';
+import 'package:flutter_notification_channel/notification_importance.dart';
+import 'package:flutter_notification_channel/notification_visibility.dart';
+import 'package:instagram_clone/Provider/post_card_provider.dart';
+import 'package:instagram_clone/Provider/profile_screen_Provider.dart';
 import 'package:instagram_clone/Provider/user_provider.dart';
 import 'package:instagram_clone/Responsive/mobile_layout.dart';
 import 'package:instagram_clone/Responsive/responsive_layout.dart';
@@ -27,7 +32,13 @@ void main() async{
   else{
     await Firebase.initializeApp();
   }
-
+  var result = await FlutterNotificationChannel.registerNotificationChannel(
+    description: 'Notications for chats',
+    id: 'chats',
+    importance: NotificationImportance.IMPORTANCE_HIGH,
+    name: 'Chats',
+    visibility: NotificationVisibility.VISIBILITY_PUBLIC,
+  );
   runApp(const MyApp());
 }
 
@@ -40,6 +51,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_)=>UserProvider(),),
+        ChangeNotifierProvider(create: (_)=>ProfileScreenProvider(),),
+        ChangeNotifierProvider(create: (_)=>PostCardProvider(),),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

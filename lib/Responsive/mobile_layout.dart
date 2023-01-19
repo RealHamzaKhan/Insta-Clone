@@ -1,13 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:instagram_clone/Models/user_model.dart';
-import 'package:instagram_clone/Provider/user_provider.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_variables.dart';
-import 'package:provider/provider.dart';
-
-import '../utils/routes/routes_names.dart';
 class MobileLayout extends StatefulWidget {
   const MobileLayout({Key? key}) : super(key: key);
 

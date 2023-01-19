@@ -2,8 +2,10 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:instagram_clone/Models/post_model.dart';
+import 'package:instagram_clone/resources/notification_methods.dart';
 import 'package:instagram_clone/resources/storage_methods.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:uuid/uuid.dart';
@@ -30,7 +32,8 @@ class FireStoreMethods{
           postid: postid,
           profImage: profImage,
           dateTime: DateTime.now(),
-          likes: []
+          likes: [],
+        savers: []
       );
       await firestore.collection('posts').doc(postid).set(postModel.toJson());
       res='success';
@@ -135,14 +138,14 @@ class FireStoreMethods{
   }
   Future<String> updateProfile({
     required String uid,
-    required String email,
+    required String url,
     required String username,
     required String bio
   })async{
     String res="some error occured";
     try{
       await firestore.collection('users').doc(uid).update({
-        'email':email,
+        'photourl':url,
         'username':username,
         'bio':bio
       });
@@ -182,6 +185,74 @@ class FireStoreMethods{
         'recieveruid':recieverUid,
         'chatuid':chatId,
         'message':message,
+        'datetime':DateTime.now(),
+        'isread':false,
+        'conversationid':senderUid+recieverUid
+      });
+      DocumentSnapshot recieversnap=await firestore.collection('users').doc(recieverUid).get();
+      DocumentSnapshot sendersnap=await firestore.collection('users').doc(senderUid).get();
+      String token=recieversnap['pushtoken'];
+      String username=sendersnap['username'];
+      var checkedMessage=Uri.tryParse(message);
+      NotificationMethods.sendPushNotification(token,checkedMessage!.isAbsolute?'Image':message, username);
+      res='success';
+    }
+    catch(e){
+      res=e.toString();
+    }
+    return res;
+  }
+  Future<void> messageReadCheck(String senderuid,String recieveruid)async{
+    await FirebaseFirestore.instance.collection('chats').where('conversationid',whereIn: [senderuid+recieveruid,recieveruid+senderuid])
+        .get().then((value) {
+       value.docs.forEach((element) {
+         element.reference.update({
+           'isread':true
+         });
+       });
+    });
+  }
+  Future<void> savePost(String postId)async{
+    try{
+      await firestore.collection('posts').doc(postId).update({
+        'savers':FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+      });
+    }
+    catch(e){
+      debugPrint('Error occured in save post');
+    }
+
+  }
+  Future<void> unsavePost(String postId)async{
+    try{
+      await firestore.collection('posts').doc(postId).update({
+        'savers':FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+      });
+    }
+    catch(e){
+      debugPrint('Error occured at unsave post');
+    }
+
+  }
+
+
+  Future<String> postVideo(
+      String uid,
+      String description,
+      String username,
+      Uint8List file,
+      )async{
+    String res='some error occured';
+    try{
+      String reelUrl=await StorageMethods().uploadVideoToStorage('reels', file, true);
+      final postid=Uuid().v1();
+      await firestore.collection('reels').doc(postid).set({
+        'reelid':postid,
+        'uid':FirebaseAuth.instance.currentUser!.uid,
+        'description':description,
+        'username':username,
+        'reelurl': reelUrl,
+        'likes':[],
         'datetime':DateTime.now()
       });
       res='success';
@@ -190,5 +261,47 @@ class FireStoreMethods{
       res=e.toString();
     }
     return res;
+  }
+  Future<void> likeReel(List likes,String uid,String postId)async{
+    try{
+      if(likes.contains(uid)){
+        await firestore.collection('reels').doc(postId).update({
+          'likes':FieldValue.arrayRemove([uid])
+        });
+      }
+      else{
+        await firestore.collection('reels').doc(postId).update({
+          'likes':FieldValue.arrayUnion([uid])
+        });
+      }
+    }
+    catch (e){
+      debugPrint(e.toString());
+    }
+
+  }
+  Future<void> generateNotication({required String reciveruid,
+    required String notication,
+  required String photourl,
+  required String username
+  })async{
+    String notificationId=const Uuid().v1();
+    await firestore.collection('notifications').doc(notificationId).set({
+      'notificationid':notificationId,
+      'reciveruid':reciveruid,
+      'generatoruid':FirebaseAuth.instance.currentUser!.uid,
+      'datetime':DateTime.now(),
+      'notification': notication,
+      'photourl':photourl,
+      'username':username
+    });
+  }
+  Future<void> deletePost(String postId)async{
+    await firestore.collection('posts').doc(postId).delete();
+  }
+  Future<void> unsave(String postId)async{
+    await firestore.collection('posts').doc(postId).update({
+      'savers':FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+    });
   }
 }

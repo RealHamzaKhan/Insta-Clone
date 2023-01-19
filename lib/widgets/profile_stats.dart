@@ -13,13 +13,13 @@ class ProfileStats extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(value.toString(),style: TextStyle(
+          Text(value.toString(),style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20
           ),),
           Container(
-            margin: EdgeInsets.only(top: 5),
-            child: Text(name,style: TextStyle(
+            margin: const EdgeInsets.only(top: 5),
+            child: Text(name,style: const TextStyle(
               color: secondaryColor,
               fontWeight: FontWeight.w600,
               fontSize: 13

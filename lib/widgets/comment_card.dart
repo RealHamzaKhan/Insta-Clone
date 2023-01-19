@@ -24,7 +24,7 @@ class CommentCard extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen(uid: snap['uid'])));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen(uid: snap['uid'],myProf: true,)));
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(right: 8.0),
@@ -65,7 +65,7 @@ class CommentCard extends StatelessWidget {
           ),
           Align(
               alignment: Alignment.topLeft,
-              child: Text(DateFormat.yMMMd().format(snap['publisheddate'].toDate()),style: TextStyle(
+              child: Text(DateFormat.yMMMd().format(snap['publisheddate'].toDate()),style: const TextStyle(
                 color: secondaryColor,
                 fontSize: 12,
               ),)),

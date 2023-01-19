@@ -18,4 +18,16 @@ class StorageMethods{
     String downloadUrl=await snapshot.ref.getDownloadURL();
     return downloadUrl;
   }
+
+  Future<String> uploadVideoToStorage(String childname,Uint8List imagefile,bool isPost)async{
+    Reference reference=_storage.ref(childname).child(_auth.currentUser!.uid);
+    if(isPost){
+      final postId=Uuid().v1();
+      reference=reference.child(postId);
+    }
+    UploadTask uploadTask=reference.putData(imagefile);
+    TaskSnapshot snapshot=await uploadTask;
+    String downloadUrl=await snapshot.ref.getDownloadURL();
+    return downloadUrl;
+  }
 }

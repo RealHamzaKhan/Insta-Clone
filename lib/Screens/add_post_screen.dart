@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/Models/user_model.dart';
+import 'package:instagram_clone/Provider/profile_screen_Provider.dart';
 import 'package:instagram_clone/Provider/user_provider.dart';
 import 'package:instagram_clone/resources/Firestore_methods.dart';
 import 'package:instagram_clone/utils/colors.dart';
@@ -17,9 +18,9 @@ class AddPost extends StatefulWidget {
 }
 
 class _AddPostState extends State<AddPost> {
+ bool _isLoading=false;
+ Uint8List? _file;
   final descriptionController=TextEditingController();
-  bool _isLoading=false;
-  Uint8List? _file;
   void clearFile(){
     setState(() {
       _file=null;
@@ -34,7 +35,7 @@ class _AddPostState extends State<AddPost> {
             padding: EdgeInsets.all(20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
-              children: [
+              children: const [
                 Icon(Icons.camera_alt),
                 SizedBox(width: 10,),
                 Text('Choose from Camera')
@@ -53,7 +54,7 @@ class _AddPostState extends State<AddPost> {
             padding: EdgeInsets.all(20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
-              children: [
+              children: const [
                 Icon(Icons.browse_gallery),
                 SizedBox(width: 10,),
                 Text('Choose from Gallery')
@@ -72,7 +73,7 @@ class _AddPostState extends State<AddPost> {
             padding: EdgeInsets.all(20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
-              children: [
+              children: const [
                 Icon(Icons.cancel),
                 SizedBox(width: 10,),
                 Text('Cancel')
@@ -122,95 +123,105 @@ class _AddPostState extends State<AddPost> {
     final height=MediaQuery.of(context).size.height*1;
     final width=MediaQuery.of(context).size.width*1;
     final UserProvider userProvider=Provider.of<UserProvider>(context);
-    return _file==null?Center(
-      child: IconButton(onPressed: (){
-        selectImage(context);
-      }, icon: Icon(Icons.upload)),
-    )
-    : Scaffold(
-      appBar: _isLoading==true?AppBar(backgroundColor: mobileBackgroundColor,):AppBar(
-        centerTitle: false,
-        backgroundColor: mobileBackgroundColor,
-        leading: GestureDetector(
-            onTap: (){
-              clearFile();
-            },
-            child: Icon(Icons.arrow_back,color: primaryColor,size: 28,)),
-        title:
-          const Text('Post to',style: TextStyle(
-            color: primaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 24
-          ),),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 10),
-            child: GestureDetector(
-              onTap: (){
-                postImage(userProvider.getUser.uid, userProvider.getUser.username, userProvider.getUser.photourl);
-              },
-              child: Text('Post',style: TextStyle(
-                color: Colors.blueAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: 18
-              ),),
-            ),
-          )
-        ],
+    return _file==null?WillPopScope(
+      onWillPop: ()async{
+        return false;
+      },
+      child: Center(
+        child: IconButton(onPressed: (){
+          selectImage(context);
+        }, icon: Icon(Icons.upload)),
       ),
-      body: _isLoading==true?
-      Center(
-        child: Container(
-          height: height*0.1,
-          width: width*0.2,
-          child: LoadingIndicator(
-              indicatorType: Indicator.ballRotateChase, /// Required, The loading type of the widget
-              colors: const [Colors.white],       /// Optional, The color collections
-              strokeWidth: 1,                     /// Optional, The stroke of the line, only applicable to widget which contains line
-              backgroundColor: Colors.black,      /// Optional, Background of the widget
-              pathBackgroundColor: Colors.black   /// Optional, the stroke backgroundColor
-          ),
-        ),
-      ):
-      Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                backgroundImage: NetworkImage(userProvider.getUser.photourl),
+    )
+    : WillPopScope(
+      onWillPop: ()async{
+        return false;
+      },
+      child: Scaffold(
+        appBar: _isLoading==true?AppBar(backgroundColor: mobileBackgroundColor,):AppBar(
+          centerTitle: false,
+          backgroundColor: mobileBackgroundColor,
+          leading: GestureDetector(
+              onTap: (){
+                clearFile();
+              },
+              child: const Icon(Icons.arrow_back,color: primaryColor,size: 28,)),
+          title:
+            const Text('Post to',style: TextStyle(
+              color: primaryColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 24
+            ),),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 10),
+              child: GestureDetector(
+                onTap: (){
+                  postImage(userProvider.getUser.uid, userProvider.getUser.username, userProvider.getUser.photourl);
+                },
+                child: const Text('Post',style: TextStyle(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18
+                ),),
               ),
-              Container(
-                width: width*0.4,
-                child: TextFormField(
-                  maxLines: 8,
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                    hintText: 'Description.....',
-                    contentPadding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
-                    border: InputBorder.none,
+            )
+          ],
+        ),
+        body: _isLoading==true?
+        Center(
+          child: Container(
+            height: height*0.1,
+            width: width*0.2,
+            child: const LoadingIndicator(
+                indicatorType: Indicator.ballRotateChase, /// Required, The loading type of the widget
+                colors: [Colors.white],       /// Optional, The color collections
+                strokeWidth: 1,                     /// Optional, The stroke of the line, only applicable to widget which contains line
+                backgroundColor: Colors.black,      /// Optional, Background of the widget
+                pathBackgroundColor: Colors.black   /// Optional, the stroke backgroundColor
+            ),
+          ),
+        ):
+        Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  backgroundImage: NetworkImage(userProvider.getUser.photourl),
+                ),
+                Container(
+                  width: width*0.4,
+                  child: TextFormField(
+                    maxLines: 8,
+                    controller: descriptionController,
+                    decoration: const InputDecoration(
+                      hintText: 'Description.....',
+                      contentPadding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: height*0.13,
-                width: width*0.2,
-                child: AspectRatio(aspectRatio: 487/451,
+                SizedBox(
+                  height: height*0.13,
+                  width: width*0.2,
+                  child: AspectRatio(aspectRatio: 487/451,
 
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: MemoryImage(_file!),
-                    fit: BoxFit.fill,
-                      alignment: FractionalOffset.topCenter
-                    )
-                  ),
-                ),),
-              )
-            ],
-          ),
-        ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: MemoryImage(_file!),
+                      fit: BoxFit.fill,
+                        alignment: FractionalOffset.topCenter
+                      )
+                    ),
+                  ),),
+                )
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -30,8 +30,8 @@ class _SignupScreenState extends State<SignupScreen> {
       setState(() {
         isLoading=false;
       });
-      Utils().showSnackBar(context, 'SignUp Successful',Colors.green);
-      Navigator.pushNamed(context, RoutesNames.responsivelayout);
+      Utils().showSnackBar(context, 'SignUp Successful you can now login',Colors.green);
+      Navigator.pushNamed(context, RoutesNames.loginScreen);
       //Signup succefull
     }
     else{
@@ -85,7 +85,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Stack(
                     children: [
                       image==null?
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 70,
                         backgroundImage: NetworkImage('https://as2.ftcdn.net/v2/jpg/02/15/84/43/1000_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg'),
                       )
@@ -130,10 +130,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Dont have an account?'),
+                      const Text('Dont have an account?'),
                       TextButton(onPressed: (){
                         Navigator.pushNamed(context, RoutesNames.loginScreen);
-                      }, child:Text('Login',style: TextStyle(
+                      }, child:const Text('Login',style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold
                       ),)),

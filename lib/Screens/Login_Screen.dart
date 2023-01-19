@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:instagram_clone/Responsive/mobile_layout.dart';
+import 'package:instagram_clone/Responsive/responsive_layout.dart';
+import 'package:instagram_clone/Responsive/web_layout.dart';
+import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/resources/auth_methods.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/routes/routes_names.dart';
@@ -20,11 +24,12 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     String res=await AuthMethods().loginUser(email: emailController.text, password: passwordController.text);
     if(res=='success'){
-      Navigator.pushNamed(context, RoutesNames.responsivelayout);
-      //login successfully
       setState(() {
         isLoading=false;
       });
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>MyApp()));
+      //login successfully
+
     }
     else{
       //login failed
@@ -48,41 +53,49 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final height=MediaQuery.of(context).size.height*1;
     final width=MediaQuery.of(context).size.width*1;
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset('assets/ic_instagram.svg',
-                height: height*0.3,
-                  width: double.infinity,
-                  color: primaryColor,
-                ),
-                SizedBox(height: height*0.06,),
-                CustomTextFormField(controller: emailController, hintText: 'Email', isPassword: false),
-                SizedBox(height: height*0.04,),
-                CustomTextFormField(controller: passwordController, hintText: 'Password', isPassword: true),
-                SizedBox(height: height*0.04,),
-                CustomButton(title: 'Login', onPressAction: (){
-                   login();
-                }, isLoading: isLoading),
-                SizedBox(height: height*0.08,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Dont have an account?'),
-                    TextButton(onPressed: (){
-                      Navigator.pushNamed(context, RoutesNames.signupScreen);
-                    }, child:Text('SignUp',style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold
-                    ),)),
-                  ],
-                ),
-              ],
+    return WillPopScope(
+      onWillPop: ()async{
+        return false;
+      },
+      child: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset('assets/ic_instagram.svg',
+                  height: height*0.3,
+                    width: double.infinity,
+                    color: primaryColor,
+                  ),
+                  SizedBox(height: height*0.06,),
+                  CustomTextFormField(controller: emailController, hintText: 'Email', isPassword: false),
+                  SizedBox(height: height*0.04,),
+                  CustomTextFormField(controller: passwordController, hintText: 'Password', isPassword: true),
+                  SizedBox(height: height*0.04,),
+                  CustomButton(title: 'Login', onPressAction: (){
+                     login();
+                     if(!isLoading){
+
+                     }
+                  }, isLoading: isLoading),
+                  SizedBox(height: height*0.08,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Dont have an account?'),
+                      TextButton(onPressed: (){
+                        Navigator.pushNamed(context, RoutesNames.signupScreen);
+                      }, child:const Text('SignUp',style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold
+                      ),)),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

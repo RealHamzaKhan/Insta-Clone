@@ -9,6 +9,7 @@ class PostModel{
   final profImage;
   final dateTime;
   final  likes;
+  final savers;
   PostModel({
     required this.username,
     required this.description,
@@ -17,7 +18,8 @@ class PostModel{
     required this.postid,
     required this.profImage,
     required this.dateTime,
-    required this.likes
+    required this.likes,
+    required this.savers
   });
   Map<String,dynamic> toJson()=>{
     "username":username,
@@ -27,7 +29,8 @@ class PostModel{
     "postid":postid,
     "dateTime":dateTime,
     "likes":likes,
-    "profImage":profImage
+    "profImage":profImage,
+    "savers":savers
   };
   static PostModel fromSnap(DocumentSnapshot snap){
     var snapshot=snap.data() as Map<String,dynamic>;
@@ -39,7 +42,8 @@ class PostModel{
         postid: snapshot['postid'],
         likes: snapshot['likes'],
         profImage: snapshot['profImage'],
-        dateTime: snapshot['dateTime']
+        dateTime: snapshot['dateTime'],
+        savers: snapshot['savers']
     );
   }
 

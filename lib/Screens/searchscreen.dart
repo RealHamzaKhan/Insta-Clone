@@ -28,88 +28,94 @@ class _SearchScreenState extends State<SearchScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: mobileBackgroundColor,
-        title: TextFormField(
-          controller: searchController,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: 'Search for a user'
+    return WillPopScope(
+      onWillPop: ()async{
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: mobileBackgroundColor,
+          title: TextFormField(
+            controller: searchController,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              hintText: 'Search for a user'
+            ),
+            // onFieldSubmitted: (String _){
+            //   setState(() {
+            //     isShowusers=true;
+            //   });
+            // },
+            onChanged: (String _){
+              setState(() {
+
+              });
+            },
           ),
-          // onFieldSubmitted: (String _){
-          //   setState(() {
-          //     isShowusers=true;
-          //   });
-          // },
-          onChanged: (String _){
-            setState(() {
-
-            });
-          },
         ),
-      ),
-      body: searchController.text.isNotEmpty?StreamBuilder(
-          stream: FirebaseFirestore
-              .instance
-              .collection('users')
-              .where(
-            'username',isGreaterThanOrEqualTo: searchController.text).snapshots(),
-          builder: (context,AsyncSnapshot<QuerySnapshot<Map<String,dynamic>>>snapshot){
-            if(!snapshot.hasData || snapshot.data==null){
-              return Center(child: CircularIndicator);
-            }
-            else{
-              return ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context,index){
-                    return InkWell(
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen(uid: snapshot.data!.docs[index]['uid'])));
+        body: searchController.text.isNotEmpty?StreamBuilder(
+            stream: FirebaseFirestore
+                .instance
+                .collection('users')
+                .where(
+              'username',isGreaterThanOrEqualTo: searchController.text).snapshots(),
+            builder: (context,AsyncSnapshot<QuerySnapshot<Map<String,dynamic>>>snapshot){
+              if(!snapshot.hasData || snapshot.data==null){
+                return Center(child: CircularIndicator);
+              }
+              else{
+                return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context,index){
+                      return InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen(uid: snapshot.data!.docs[index]['uid'],myProf: true,)));
 
-                      },
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage('${snapshot.data!.docs[index]['photourl']}'),
+                        },
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage('${snapshot.data!.docs[index]['photourl']}'),
+                          ),
+                          title: Text(snapshot.data!.docs[index]['username']),
                         ),
-                        title: Text(snapshot.data!.docs[index]['username']),
-                      ),
-                    );
-                  });
-            }
+                      );
+                    });
+              }
 
-          })
-          :FutureBuilder(
-          future: FirebaseFirestore.instance.collection('posts').get(),
-          builder: (context,AsyncSnapshot<QuerySnapshot<Map<String,dynamic>>>snapshot){
-            if(!snapshot.hasData || snapshot==null){
-              return Center(child: CircularIndicator,);
-            }
-            else{
-              return GridView.custom(
-                gridDelegate: SliverQuiltedGridDelegate(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 4,
-                  crossAxisSpacing: 4,
-                  repeatPattern: QuiltedGridRepeatPattern.inverted,
-                  pattern: [
-                    QuiltedGridTile(2, 2),
-                    QuiltedGridTile(1, 1),
-                    QuiltedGridTile(1, 1),
-                    QuiltedGridTile(1, 2),
-                  ],
-                ),
-                childrenDelegate: SliverChildBuilderDelegate(
-                  childCount: snapshot.data!.docs.length,
-                      (context, index) => Container(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(image: NetworkImage(snapshot.data!.docs[index]['photourl']),fit:BoxFit.fill )
-                          ),)
-                          //child: Image.network(snapshot.data!.docs[index]['photourl'])),
-                ),
-              );
-            }
-          })
+            })
+            :FutureBuilder(
+            future: FirebaseFirestore.instance.collection('posts').get(),
+            builder: (context,AsyncSnapshot<QuerySnapshot<Map<String,dynamic>>>snapshot){
+              if(!snapshot.hasData || snapshot==null){
+                return Center(child: CircularIndicator,);
+              }
+              else{
+                return GridView.custom(
+                  gridDelegate: SliverQuiltedGridDelegate(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 4,
+                    crossAxisSpacing: 4,
+                    repeatPattern: QuiltedGridRepeatPattern.inverted,
+                    pattern: [
+                      const QuiltedGridTile(2, 2),
+                      const QuiltedGridTile(1, 1),
+                      const QuiltedGridTile(1, 1),
+                      const QuiltedGridTile(1, 2),
+                    ],
+                  ),
+                  childrenDelegate: SliverChildBuilderDelegate(
+                    childCount: snapshot.data!.docs.length,
+                        (context, index) => Container(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(image: NetworkImage(snapshot.data!.docs[index]['photourl']),fit:BoxFit.fill )
+                            ),)
+                            //child: Image.network(snapshot.data!.docs[index]['photourl'])),
+                  ),
+                );
+              }
+            })
+      ),
     );
   }
 }

@@ -20,6 +20,30 @@ class MessageBubbles extends StatefulWidget {
 
 class _MessageBubblesState extends State<MessageBubbles> {
   @override
+  void initState() {
+    checkMessage();
+    // TODO: implement initState
+    super.initState();
+  }
+  bool? isImage;
+  void checkMessage(){
+    var input = widget.message;
+    Uri? url;
+    try{
+      url = Uri.tryParse(input);
+    }catch(e){
+      url = null;
+    }
+
+    if(url != null && url.isAbsolute) {
+      //input is url
+      isImage=true;
+    } else {
+    //input is text
+    isImage=false;
+    }
+  }
+  @override
   Widget build(BuildContext context) {
     return widget.isReciever?Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -36,12 +60,12 @@ class _MessageBubblesState extends State<MessageBubbles> {
               FittedBox(
                 child: Container(
                   width: MediaQuery.of(context).size.width*0.6,
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                       maxWidth: double.infinity,
                       maxHeight: double.infinity
                   ),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only
+                    borderRadius: const BorderRadius.only
                       (topRight: Radius.circular(10),
                       bottomLeft: Radius.circular(10),
                       bottomRight: Radius.circular(10),
@@ -50,11 +74,11 @@ class _MessageBubblesState extends State<MessageBubbles> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
-                    child: Text(widget.message),
+                    child: isImage!?Image(image: NetworkImage(widget.message)):Text(widget.message),
                   ),
                 ),
               ),
-              Text(DateFormat.yMMMd().format(widget.date.toDate()),style: TextStyle(
+              Text(DateFormat.yMMMd().format(widget.date.toDate()),style: const TextStyle(
                   color: secondaryColor,
                   fontSize: 12
               ),),
@@ -73,18 +97,18 @@ class _MessageBubblesState extends State<MessageBubbles> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text(DateFormat.yMMMd().format(widget.date.toDate()).toString(),style: TextStyle(
+              Text(DateFormat.yMMMd().format(widget.date.toDate()).toString(),style: const TextStyle(
                   color: secondaryColor,
                   fontSize: 12
               ),),
               FittedBox(
                 child: Container(
                   width: MediaQuery.of(context).size.width*0.6,
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                       maxWidth: double.infinity,
                       maxHeight: double.infinity
                   ),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     borderRadius: BorderRadius.only
                       (topRight: Radius.circular(10),
                       bottomLeft: Radius.circular(10),
@@ -94,7 +118,7 @@ class _MessageBubblesState extends State<MessageBubbles> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
-                    child: Text(widget.message),
+                    child: isImage!?Image(image: NetworkImage(widget.message)):Text(widget.message),
                   ),
                 ),
               ),
